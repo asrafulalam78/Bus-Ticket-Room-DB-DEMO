@@ -4,6 +4,7 @@ package com.mdasrafulalam78.roomdbdemo
 import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -16,6 +17,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -44,6 +47,9 @@ class NewScheduleFragment : Fragment() {
     private var id: Long? = null
     private var currentPhotoPath: String? = null
 
+    private fun show(message: String) {
+        Toast.makeText(context,message, Toast.LENGTH_SHORT).show()
+    }
     @Throws(IOException::class)
     private fun createImageFile(): File {
         // Create an image file name
@@ -104,7 +110,17 @@ class NewScheduleFragment : Fragment() {
             CAMERA = true
         }
         binding.selectFromGalleryBtn.setOnClickListener(View.OnClickListener {
-            openGalery()
+            val checkSelfPermission = ContextCompat.checkSelfPermission(requireActivity(),
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            if (checkSelfPermission != PackageManager.PERMISSION_GRANTED){
+                //Requests permissions to be granted to this application at runtime
+                ActivityCompat.requestPermissions(requireActivity(),
+                    arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+            }
+            else{
+                openGalery()
+            }
+
             CAMERA = false
         })
         binding.saveBtn.setOnClickListener {
@@ -230,6 +246,19 @@ class NewScheduleFragment : Fragment() {
         return cursor.getString(column_index)
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>
+                                            , grantedResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantedResults)
+        when(requestCode){
+            1 ->
+                if (grantedResults.isNotEmpty() && grantedResults.get(0) ==
+                    PackageManager.PERMISSION_GRANTED){
+                    openGalery()
+                }else {
+                    show("Unfortunately You are Denied Permission to Perform this Operataion.")
+                }
+        }
+    }
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
