@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/schedulListFragment">
+    <fragment
+        android:id="@+id/newScheduleFragment"
+        android:name="com.mdasrafulalam78.roomdbdemo.NewScheduleFragment"
+        android:label="@string/new_schedule"
+        tools:layout="@layout/fragment_new_schedule" >
+        <action
+            android:id="@+id/action_newScheduleFragment_to_schedulListFragment"
+            app:destination="@id/schedulListFragment"
+            app:popUpTo="@id/schedulListFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/schedulListFragment"
+        android:name="com.mdasrafulalam78.roomdbdemo.ScheduleListFragment"
+        android:label="@string/all_schedules"
+        tools:layout="@layout/fragment_schedule_list" >
+        <action
+            android:id="@+id/action_schedulListFragment_to_newScheduleFragment"
+            app:destination="@id/newScheduleFragment" />
+        <action
+            android:id="@+id/action_schedulListFragment_to_favouriteListFragment"
+            app:destination="@id/favouriteListFragment" />
+        <action
+            android:id="@+id/action_schedulListFragment_to_cartListFragment"
+            app:destination="@id/cartListFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/favouriteListFragment"
+        android:name="com.mdasrafulalam78.roomdbdemo.FavouriteListFragment"
+        android:label="@string/favourite"
+        tools:layout="@layout/fragment_favourite_list" />
+    <fragment
+        android:id="@+id/cartListFragment"
+        android:name="com.mdasrafulalam78.roomdbdemo.CartListFragment"
+        android:label="@string/my_cart"
+        tools:layout="@layout/fragment_cart_list" />
+
+</navigation>
