@@ -7,12 +7,15 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.mdasrafulalam78.roomdbdemo.daos.ScheduleDao
+import com.mdasrafulalam78.roomdbdemo.daos.UserDao
 import com.mdasrafulalam78.roomdbdemo.model.BusSchedule
 import com.mdasrafulalam78.roomdbdemo.model.Cart
+import com.mdasrafulalam78.roomdbdemo.model.UserModel
 
-@Database(entities = [BusSchedule::class,Cart::class], version = 1)
+@Database(entities = [BusSchedule::class,Cart::class, UserModel::class], version = 1)
 abstract class ScheduleDB : RoomDatabase(){
     abstract fun getScheduleDao() : ScheduleDao
+    abstract fun userDao() : UserDao
 
     companion object {
         private var db: ScheduleDB? = null

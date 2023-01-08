@@ -29,6 +29,9 @@
         <action
             android:id="@+id/action_schedulListFragment_to_cartListFragment"
             app:destination="@id/cartListFragment" />
+        <action
+            android:id="@+id/action_schedulListFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
     </fragment>
     <fragment
         android:id="@+id/favouriteListFragment"
@@ -40,5 +43,10 @@
         android:name="com.mdasrafulalam78.roomdbdemo.CartListFragment"
         android:label="@string/my_cart"
         tools:layout="@layout/fragment_cart_list" />
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.mdasrafulalam78.roomdbdemo.LoginFragment"
+        android:label="@string/login_reg"
+        tools:layout="@layout/fragment_login" />
 
 </navigation>

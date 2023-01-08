@@ -2,13 +2,16 @@ package com.mdasrafulalam78.roomdbdemo
 
 import android.os.Bundle
 import android.util.Log
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.widget.SearchView
 import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,15 +23,33 @@ import com.mdasrafulalam78.roomdbdemo.databinding.FragmentScheduleListBinding
 import com.mdasrafulalam78.roomdbdemo.model.BusSchedule
 import com.mdasrafulalam78.roomdbdemo.model.Cart
 import com.mdasrafulalam78.roomdbdemo.viewmodel.ScheduleViewModel
+import kotlinx.coroutines.launch
 
 class ScheduleListFragment : Fragment()
 {
+    private lateinit var preference: LoginPreference
+    private var userId: Long = 0L
     private lateinit var binding: FragmentScheduleListBinding
     private val viewModel: ScheduleViewModel by activityViewModels()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        preference = LoginPreference(requireContext())
+        preference.isLoggedInFlow
+            .asLiveData()
+            .observe(viewLifecycleOwner){
+                if (!it) {
+                    findNavController().navigate(R.id.action_schedulListFragment_to_loginFragment)
+                }
+            }
+        preference.userIdFlow.asLiveData().observe(viewLifecycleOwner, Observer {
+            userId = it
+        })
         binding = FragmentScheduleListBinding.inflate(inflater, container, false)
         val scheduleAdapter = ScheduleAdapter(::onMenuItemClicked, ::updateFavorite)
         binding.scheduleRV.layoutManager = LinearLayoutManager(requireActivity())
@@ -54,6 +75,10 @@ class ScheduleListFragment : Fragment()
         return binding.root
     }
 
+    companion object{
+         var userId: Long = 0L
+    }
+
     private fun updateFavorite(schedule: BusSchedule) {
         viewModel.updateSchedule(schedule)
     }
@@ -68,6 +93,5 @@ class ScheduleListFragment : Fragment()
             else -> {}
         }
     }
-
 
 }

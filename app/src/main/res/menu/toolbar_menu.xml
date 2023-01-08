@@ -14,6 +14,9 @@
         android:title="@string/message"
         android:icon="@drawable/ic_baseline_mail_outline_24"
         app:showAsAction="ifRoom" />
+    <item android:title="@string/logout"
+        app:showAsAction="never"
+        android:id="@+id/logout"/>
 
     <item android:id="@+id/action_profile"
         android:title="@string/profile_menu"
