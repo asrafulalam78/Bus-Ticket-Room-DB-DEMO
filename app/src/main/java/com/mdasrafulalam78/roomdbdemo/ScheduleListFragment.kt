@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
 import com.google.android.material.snackbar.Snackbar
 import com.mdasrafulalam78.roomdbdemo.adapter.RowAction
 import com.mdasrafulalam78.roomdbdemo.adapter.ScheduleAdapter
@@ -30,6 +31,7 @@ class ScheduleListFragment : Fragment()
     private lateinit var preference: LoginPreference
     private var userId: Long = 0L
     private lateinit var binding: FragmentScheduleListBinding
+    private lateinit var scheduleAdapter: ScheduleAdapter
     private val viewModel: ScheduleViewModel by activityViewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,9 +53,10 @@ class ScheduleListFragment : Fragment()
             userId = it
         })
         binding = FragmentScheduleListBinding.inflate(inflater, container, false)
-        val scheduleAdapter = ScheduleAdapter(::onMenuItemClicked, ::updateFavorite)
+        scheduleAdapter = ScheduleAdapter(::onMenuItemClicked, ::updateFavorite)
         binding.scheduleRV.layoutManager = LinearLayoutManager(requireActivity())
         binding.scheduleRV.adapter = scheduleAdapter
+
         viewModel.getAllSchedules().observe(viewLifecycleOwner) {scheduleList ->
             scheduleAdapter.submitList(scheduleList)
         }
@@ -77,6 +80,57 @@ class ScheduleListFragment : Fragment()
 
     companion object{
          var userId: Long = 0L
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.toolbar_menu,menu)
+        val search = menu?.findItem(R.id.action_search)
+        val searchView = search?.actionView as SearchView
+        searchView.queryHint = "Search"
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                var scheduleListMain: List<BusSchedule>
+                viewModel.getAllSchedules().observe(viewLifecycleOwner, Observer {
+                     scheduleListMain = it
+                    var collectionSearch: List<BusSchedule> = scheduleListMain.filter {
+                        it.name.contains(query.toString())
+                    }.toList()
+                    scheduleAdapter.submitList(collectionSearch)
+                })
+
+                return true
+            }
+            override fun onQueryTextChange(newText: String?): Boolean {
+                var scheduleListMain: List<BusSchedule>
+                viewModel.getAllSchedules().observe(viewLifecycleOwner, Observer {
+                    scheduleListMain = it
+                    var collectionSearch: List<BusSchedule> = scheduleListMain.filter {
+                        it.name.contains(newText.toString())
+                    }.toList()
+                    scheduleAdapter.submitList(collectionSearch)
+                })
+                return true
+            }
+        })
+
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId){
+            R.id.action_notification -> Toast.makeText(requireContext(),"No new notification", Toast.LENGTH_SHORT).show()
+            R.id.action_message -> Toast.makeText(requireContext(),"No new messsage", Toast.LENGTH_SHORT).show()
+            R.id.action_search -> Toast.makeText(requireContext(),"Search is not implemented yet", Toast.LENGTH_SHORT).show()
+            R.id.logout -> {
+                preference.userIdFlow.asLiveData().observe(this, Observer {
+                    ScheduleListFragment.userId = it
+                })
+                lifecycle.coroutineScope.launch {
+                    preference.setLoginStatus(false, ScheduleListFragment.userId, requireContext())
+                }
+            }
+        }
+        return super.onOptionsItemSelected(item)
+//                Toast.makeText(this,"Your Profile will be visible soon!",Toast.LENGTH_SHORT).show()
     }
 
     private fun updateFavorite(schedule: BusSchedule) {

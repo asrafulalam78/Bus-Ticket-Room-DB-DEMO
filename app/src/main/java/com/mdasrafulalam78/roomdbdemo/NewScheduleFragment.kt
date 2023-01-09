@@ -12,9 +12,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.provider.MediaStore.*
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
@@ -22,12 +20,15 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
 import com.mdasrafulalam78.roomdbdemo.databinding.FragmentNewScheduleBinding
 import com.mdasrafulalam78.roomdbdemo.model.BusSchedule
 import com.mdasrafulalam78.roomdbdemo.viewmodel.ScheduleViewModel
 import com.tanvir.training.actioninputsbatch04.customdialogs.DatePickerFragment
 import com.tanvir.training.actioninputsbatch04.customdialogs.TimePickerFragment
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -35,6 +36,7 @@ import java.util.*
 
 
 class NewScheduleFragment : Fragment() {
+    private lateinit var preference: LoginPreference
     val REQUEST_IMAGE_CAPTURE = 1
     val REQUEST_IMAGE_SELECT = 2
     private val viewModel: ScheduleViewModel by activityViewModels()
@@ -46,7 +48,30 @@ class NewScheduleFragment : Fragment() {
     private var selectedTime = ""
     private var id: Long? = null
     private var currentPhotoPath: String? = null
-
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.toolbar_menu,menu)
+    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId){
+            R.id.action_notification -> Toast.makeText(requireContext(),"No new notification", Toast.LENGTH_SHORT).show()
+            R.id.action_message -> Toast.makeText(requireContext(),"No new messsage", Toast.LENGTH_SHORT).show()
+            R.id.action_search -> Toast.makeText(requireContext(),"Search is not implemented yet", Toast.LENGTH_SHORT).show()
+            R.id.logout -> {
+                preference.userIdFlow.asLiveData().observe(this, androidx.lifecycle.Observer {
+                    ScheduleListFragment.userId = it
+                })
+                lifecycle.coroutineScope.launch {
+                    preference.setLoginStatus(false, ScheduleListFragment.userId, requireContext())
+                }
+            }
+        }
+        return super.onOptionsItemSelected(item)
+//                Toast.makeText(this,"Your Profile will be visible soon!",Toast.LENGTH_SHORT).show()
+    }
     private fun show(message: String) {
         Toast.makeText(context,message, Toast.LENGTH_SHORT).show()
     }
@@ -188,7 +213,6 @@ class NewScheduleFragment : Fragment() {
         )
         binding.fromCitySpinner.adapter = cityAdapter
         binding.toCitySpinner.adapter = cityAdapter
-
         binding.fromCitySpinner.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener{
                 override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
